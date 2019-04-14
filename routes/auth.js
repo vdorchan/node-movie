@@ -21,10 +21,7 @@ auth.post('/login', async (ctx, next) => {
 
     ctx.body = {
       success: true,
-      userInfo: {
-        nickname,
-        favorites: user.favorites
-      },
+      userInfo: user.getUserInfo(),
       msg: '登录成功',
       auth: true,
       token
@@ -41,7 +38,7 @@ auth.post('/login', async (ctx, next) => {
 auth.get('/profile', verifyToken, async (ctx, next) => {
   try {
     const { decoded } = ctx
-    
+
     const user = await User.findById(decoded.id)
 
     if (!user) throw new Error('')
@@ -51,7 +48,7 @@ auth.get('/profile', verifyToken, async (ctx, next) => {
       success: true
     }
   } catch (error) {
-    ctx.body ={
+    ctx.body = {
       success: false,
       message: 'UnAuthorized'
     }

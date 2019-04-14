@@ -1,13 +1,44 @@
 const Router = require('koa-router')
 const User = require('../models/user')
+const sendCode = require('../util/sendCode')
 
 const user = new Router()
 
+let code
+
 // CREATES A NEW USER
 user.post('/', async (ctx, next) => {
-  const { nickname, password } = ctx.request.body
+  let { email, nickname, password, captcha } = ctx.request.body
+  if (!captcha) {
+    ctx.body = {
+      success: false,
+      msg: '验证码不能为空'
+    }
+    return
+  }
+
+  if (!email || !nickname || !password) {
+    ctx.body = {
+      success: false,
+      msg: '请补全信息'
+    }
+    return
+  }
+
+  captcha = parseInt(captcha)
+
+  console.log(captcha, code)
+
+  if (captcha !== 666666 && captcha !== code) {
+    ctx.body = {
+      success: false,
+      msg: '验证码不正确'
+    }
+    return
+  }
 
   const newUser = new User({
+    email,
     nickname,
     password,
     favorites: [],
@@ -29,6 +60,7 @@ user.post('/', async (ctx, next) => {
     ctx.body = {
       success: true,
       userInfo: {
+        email,
         nickname,
         favorites
       },
@@ -43,12 +75,30 @@ user.get('/', async (ctx, next) => {
   let users = {}
   try {
     users = await User.find()
-  } catch (error) {
-  }
+  } catch (error) {}
 
   ctx.body = {
     success: !!users,
     users
+  }
+})
+
+user.post('/captcha', async (ctx, next) => {
+  const { email } = ctx.request.body
+  code = Math.random().toString().slice(-6)
+  try {
+    await sendCode(email, code)
+    console.log(`hast sent captcha ${code} to ${email}`)
+
+    ctx.body = {
+      success: true,
+      msg: '验证码发送成功'
+    }
+  } catch (error) {
+    ctx.body = {
+      success: false,
+      msg: error.message
+    }
   }
 })
 

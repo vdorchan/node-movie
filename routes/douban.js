@@ -3,9 +3,9 @@ const cheerio = require('cheerio')
 
 const { httpsGet, updateQueryStringParameter } = require('../util')
 
-const apiKey = require('../apiKey') // apiKey 从豆瓣申请，可以增加单位时间内允许请求数，以及更多的可访问数据
+const { DOUBAN_API_KEY } = require('../ENV') // apiKey 从豆瓣申请，可以增加单位时间内允许请求数，以及更多的可访问数据
 
-const appendApiKey = url => updateQueryStringParameter(url, 'apiKey', apiKey)
+const appendApiKey = url => updateQueryStringParameter(url, 'apiKey', DOUBAN_API_KEY)
 
 const requestDouban = async url => {
   const body = await httpsGet(appendApiKey(`https://api.douban.com/v2/movie${url.replace('/movie', '')}`))
