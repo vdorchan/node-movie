@@ -3,19 +3,15 @@ const User = require('../models/user')
 
 const user = new Router()
 
-user.post('/', async (ctx, next) => {  
-  const {
-    nickname,
-    password
-  } = ctx.request.body
-
-  // console.log('register', 'nickname:', nickname, 'password', password);
+// CREATES A NEW USER
+user.post('/', async (ctx, next) => {
+  const { nickname, password } = ctx.request.body
 
   const newUser = new User({
     nickname,
     password,
     favorites: [],
-    avatar: '//dummyimage.com/130x130'
+    avatar: 'https://avatars1.githubusercontent.com/u/18571585?s=460&v=4'
   })
 
   const user = await User.findUserByname(nickname)
@@ -42,27 +38,18 @@ user.post('/', async (ctx, next) => {
   }
 })
 
+// RETURNS ALL THE USERS IN THE DATABASE
 user.get('/', async (ctx, next) => {
+  let users = {}
+  try {
+    users = await User.find()
+  } catch (error) {
+  }
 
-  // try {
-  //   const {nickname, favorites} =  User.findUserByname(ctx.session.nickname)
-
-  //   ctx.body = {
-  //     success: true,
-  //     userInfo: {
-  //       nickname,
-  //       favorites
-  //     },
-  //     msg: '登录成功'
-  //   }
-  // } catch ({message}) {
-  //   ctx.body = {
-  //     success: false,
-  //     userInfo: null,
-  //     msg: message
-  //   }
-  // }
-
+  ctx.body = {
+    success: !!users,
+    users
+  }
 })
 
 module.exports = user

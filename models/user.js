@@ -11,7 +11,11 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true
   },
-  favorites: Array
+  favorites: Array,
+  avatar: {
+    type: String,
+    required: true
+  }
 })
 
 userSchema.pre('save', async function (done) {
@@ -53,15 +57,19 @@ userSchema.methods.removeFromFavorites = async function (movieId) {
   }
 }
 
-userSchema.methods.getUserInfo = async function () {
+userSchema.methods.getUserInfo = function () {
   const {
     nickname,
-    favorites
+    favorites,
+    avatar,
+    id
   } = this
 
   return {
     nickname,
-    favorites
+    favorites,
+    avatar,
+    id
   }
 }
 
@@ -84,6 +92,10 @@ userSchema.statics.matchUser = async function (nickname, password) {
   console.log(1221);
 
   throw new Error('密码不匹配！')
+}
+
+userSchema.statics.findUserById = async function (id) {
+  return await this.findById(id)
 }
 
 // userSchema.methods.speak = function() {

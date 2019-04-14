@@ -11,6 +11,7 @@ const { movie } = require('./routes/douban')
 const user = require('./routes/user')
 const favorites = require('./routes/favorites')
 const _session = require('./routes/session')
+const auth = require('./routes/auth')
 
 const CONFIG = {
   key: 'koa:sess' /** (string) cookie key (default is koa:sess) */,
@@ -29,10 +30,11 @@ app.keys = ['some secret hurr']
 
 const db = require('./db')
 
+router.use('/auth', auth.routes(), auth.allowedMethods())
 router.use('/movie', movie.routes(), movie.allowedMethods())
 router.use('/user', user.routes(), user.allowedMethods())
 router.use('/favorites', favorites.routes(), favorites.allowedMethods())
-router.use('/session', _session.routes(), _session.allowedMethods())
+// router.use('/session', _session.routes(), _session.allowedMethods())
 
 app
   .use(
@@ -40,7 +42,7 @@ app
       credentials: true
     })
   )
-  .use(session(CONFIG, app))
+  // .use(session(CONFIG, app))
   .use(bodyPaser())
   .use(router.routes())
   .use(router.allowedMethods())

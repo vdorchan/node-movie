@@ -1,12 +1,11 @@
 const Router = require('koa-router')
 const User = require('../models/user')
+const verifyToken = require('../util/verifyToken')
 
 const favorites = new Router()
 
-favorites.post('/', async (ctx, next) => {
-  const {
-    movie
-  } = ctx.request.body
+favorites.post('/', verifyToken, async (ctx, next) => {
+  const { movie } = ctx.request.body
 
   if (!movie) {
     ctx.body = {
@@ -17,7 +16,7 @@ favorites.post('/', async (ctx, next) => {
   }
 
   try {
-    const theUser = await User.findUserByname(ctx.session.nickname) 
+    const theUser = await User.findById(ctx.decoded.id)
     const favorites = await theUser.addToFavorites(movie)
 
     ctx.body = {
@@ -25,7 +24,7 @@ favorites.post('/', async (ctx, next) => {
       favorites,
       msg: '收藏成功'
     }
-  } catch ({message}) {
+  } catch ({ message }) {
     ctx.body = {
       success: false,
       userInfo: null,
@@ -34,21 +33,19 @@ favorites.post('/', async (ctx, next) => {
   }
 })
 
-favorites.delete('/', async (ctx, next) => {
-  const {
-    movieId
-  } = ctx.query
+favorites.delete('/', verifyToken, async (ctx, next) => {
+  const { movieId } = ctx.query
 
   if (!movieId) {
     ctx.body = {
       success: false,
       msg: '请传入要删除收藏的电影！'
     }
-    return 
+    return
   }
 
   try {
-    const theUser = await User.findUserByname(ctx.session.nickname) 
+    const theUser = await User.findById(ctx.decoded.id)
     const favorites = await theUser.removeFromFavorites(movieId)
 
     ctx.body = {
@@ -56,7 +53,7 @@ favorites.delete('/', async (ctx, next) => {
       favorites,
       msg: '删除收藏成功'
     }
-  } catch ({message}) {
+  } catch ({ message }) {
     ctx.body = {
       success: false,
       msg: message
