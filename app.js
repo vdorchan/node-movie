@@ -13,19 +13,6 @@ const favorites = require('./routes/favorites')
 const _session = require('./routes/session')
 const auth = require('./routes/auth')
 
-const CONFIG = {
-  key: 'koa:sess' /** (string) cookie key (default is koa:sess) */,
-  /** (number || 'session') maxAge in ms (default is 1 days) */
-  /** 'session' will result in a cookie that expires when session/browser is closed */
-  /** Warning: If a session cookie is stolen, this cookie will never expire */
-  maxAge: 86400000,
-  overwrite: true /** (boolean) can overwrite or not (default true) */,
-  httpOnly: true /** (boolean) httpOnly or not (default true) */,
-  signed: true /** (boolean) signed or not (default true) */,
-  rolling: false /** (boolean) Force a session identifier cookie to be set on every response. The expiration is reset to the original maxAge, resetting the expiration countdown. (default is false) */,
-  renew: false /** (boolean) renew session when session is nearly expired, so we can always keep user logged in. (default is false)*/
-}
-
 app.keys = ['some secret hurr']
 
 const db = require('./db')
@@ -34,19 +21,6 @@ router.use('/auth', auth.routes(), auth.allowedMethods())
 router.use('/movie', movie.routes(), movie.allowedMethods())
 router.use('/user', user.routes(), user.allowedMethods())
 router.use('/favorites', favorites.routes(), favorites.allowedMethods())
-// router.use('/session', _session.routes(), _session.allowedMethods())
-
-app
-  .use(
-    cors({
-      credentials: true
-    })
-  )
-  // .use(session(CONFIG, app))
-  .use(bodyPaser())
-  .use(router.routes())
-  .use(router.allowedMethods())
-  .listen(8080)
 
 db.connection.on('error', err => {
   console.log('数据库连接失败', err)
@@ -54,4 +28,16 @@ db.connection.on('error', err => {
 
 db.connection.on('open', async () => {
   console.log('数据库连接成功')
+  app
+    .use(
+      cors({
+        credentials: true
+      })
+    )
+    .use(bodyPaser())
+    .use(router.routes())
+    .use(router.allowedMethods())
+    .listen(8080, () => {
+      console.log('server listening on port 8080')
+    })
 })
